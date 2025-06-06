@@ -26,5 +26,12 @@ def main():
     else:
         print(" Aucun arbre à couper trouvé.")
 
+    # Étape 4 : Simulation du feu après déboisement
+    sim_avec = Simulateur(largeur, hauteur, pourcentage_arbres)
+    sim_avec.carte = [row[:] for row in sim.carte]
+    sim_avec.propager_feu(*point_depart)
+    sim_avec.exporter_html("3_feu_avec_deboisement.html")
+    brulees_avec = sim_avec.compter_cases_brulees()
+
 if __name__ == "__main__":
     main()
