@@ -17,5 +17,14 @@ def main():
     sim_sans.exporter_html("2_feu_sans_deboisement.html")
     brulees_sans = sim_sans.compter_cases_brulees()
 
+    # Étape 3 : Recherche du meilleur arbre à déboiser
+    meilleur = sim.trouver_meilleur_deboisement(*point_depart)
+    if meilleur:
+        x, y = meilleur
+        sim.carte[y][x] = Simulateur.COUPE  # Marquer l'arbre coupé
+        print(f" Meilleur arbre à couper : {meilleur}")
+    else:
+        print(" Aucun arbre à couper trouvé.")
+
 if __name__ == "__main__":
     main()
