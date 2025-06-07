@@ -40,6 +40,9 @@ def main():
     y = demander_entier(f"Position Y du départ du feu (0 à {max_y}) : ", 0, max_y)
     point_depart = (x, y)
 
+    # Nombre de déboisement possible
+    nb_deboisements = demander_entier("Nombre maximum d'arbres à couper : ", min_val=0)
+
     # Étape 1 : Génération de la carte initiale
     sim = Simulateur(largeur, hauteur, pourcentage_arbres)
     sim.exporter_html("1_carte_originale.html")
@@ -52,13 +55,17 @@ def main():
     brulees_sans = sim_sans.compter_cases_brulees()
 
     # Étape 3 : Recherche du meilleur arbre à déboiser
-    meilleur = sim.trouver_meilleur_deboisement(*point_depart)
-    if meilleur:
-        x, y = meilleur
-        sim.carte[y][x] = Simulateur.COUPE  # Marquer l'arbre coupé
-        print(f" Meilleur arbre à couper : {meilleur}")
-    else:
-        print(" Aucun arbre à couper trouvé.")
+
+    print("\n🔁 Recherche des meilleurs arbres à couper...")
+    for i in range(nb_deboisements):
+        meilleur = sim.trouver_meilleur_deboisement(*point_depart)
+        if meilleur:
+            mx, my = meilleur
+            sim.carte[my][mx] = Simulateur.COUPE
+            print(f"🪓 Arbre #{i + 1} coupé à : {meilleur}")
+        else:
+            print(f"⚠️ Aucun arbre à couper trouvé à l'itération {i + 1}.")
+            break
 
     # Étape 4 : Simulation du feu après déboisement
     sim_avec = Simulateur(largeur, hauteur, pourcentage_arbres)
