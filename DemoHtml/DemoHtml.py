@@ -1,10 +1,44 @@
 from feu_foret.simulateur import Simulateur
 
+def demander_entier(message, min_val=0, max_val=None):
+    while True:
+        try:
+            valeur = int(input(message))
+            if valeur < min_val or (max_val is not None and valeur > max_val):
+                print(f"Veuillez entrer une valeur entre {min_val} et {max_val}.")
+            else:
+                return valeur
+        except ValueError:
+            print("Veuillez entrer un entier valide.")
+
+def demander_float(message, min_val=0.0, max_val=1.0):
+    while True:
+        try:
+            valeur = float(input(message))
+            if valeur < min_val or valeur > max_val:
+                print(f"Veuillez entrer une valeur entre {min_val} et {max_val}.")
+            else:
+                return valeur
+        except ValueError:
+            print("Veuillez entrer un nombre valide.")
+
 def main():
-    largeur = 10
-    hauteur = 10
-    pourcentage_arbres = 0.6
-    point_depart = (5, 5)
+    # largeur = 10
+    # hauteur = 10
+    # pourcentage_arbres = 0.6
+    # point_depart = (5, 5)
+
+    print(" Simulation de feu de forêt")
+
+    largeur = demander_entier("Largeur de la carte (ex: 10) : ", min_val=1)
+    hauteur = demander_entier("Hauteur de la carte (ex: 10) : ", min_val=1)
+    pourcentage_arbres = demander_float("Pourcentage d'arbres (0.0 à 1.0, ex: 0.6) : ")
+
+    max_x = largeur - 1
+    max_y = hauteur - 1
+    x = demander_entier(f"Position X du départ du feu (0 à {max_x}) : ", 0, max_x)
+    y = demander_entier(f"Position Y du départ du feu (0 à {max_y}) : ", 0, max_y)
+    point_depart = (x, y)
 
     # Étape 1 : Génération de la carte initiale
     sim = Simulateur(largeur, hauteur, pourcentage_arbres)
