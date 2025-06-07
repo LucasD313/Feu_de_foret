@@ -8,14 +8,10 @@ def test_propagation_du_feu():
         ['A', 'A', 'A'],
         ['.', 'A', '.'],
     ]
-    sim.propager_feu(1, 1)
+    sim.propager_feu(1, 1) #ici on doit faire en sorte que l'utilisateur puisse rentrer ce qu'il veut
 
-    # Toutes les cases A doivent être brûlées
-    for y in range(3):
-        for x in range(3):
-            case = sim.carte[y][x]
-            if case == 'A':
-                assert False, f"Case ({x},{y}) aurait dû brûler"
+    nb_arbres_restants = sum(row.count('A') for row in sim.carte)
+    assert nb_arbres_restants == 0, f"Des arbres n'ont pas brûlé : {nb_arbres_restants} restants"
     assert sim.carte[1][1] == 'B'  # Le point de départ
 
 def test_trouver_meilleur_deboisement():
@@ -26,18 +22,26 @@ def test_trouver_meilleur_deboisement():
         ['.', 'A', '.'],
     ]
     meilleur = sim.trouver_meilleur_deboisement(1, 1)
-
-    # Vérifie que la position est bien un arbre dans la configuration d'origine
     assert isinstance(meilleur, tuple)
     x, y = meilleur
     assert 0 <= x < sim.largeur and 0 <= y < sim.hauteur
     assert sim.carte[y][x] == 'A'
 
+def test_compter_cases_brulees():
+    sim = Simulateur(3, 3, 0)
+    sim.carte = [
+        ['B', 'A', 'B'],
+        ['A', 'B', 'A'],
+        ['B', '.', 'B'],
+    ]
+    assert sim.compter_cases_brulees() == 5
+
 def test_export_html():
-    sim = Simulateur(2, 2, 0)
+    sim = Simulateur(2, 3, 0)
     sim.carte = [
         ['A', '.'],
         ['E', 'B'],
+        ['X', '.'],
     ]
     chemin_fichier = "test_carte.html"
     sim.exporter_html(chemin_fichier)
@@ -47,8 +51,14 @@ def test_export_html():
     with open(chemin_fichier, "r", encoding="utf-8") as f:
         contenu = f.read()
 
+    # Vérifie que toutes les couleurs attendues sont bien exportées
     assert "<table>" in contenu
-    assert "#228B22" in contenu  # vert = arbre
-    assert "#8B0000" in contenu  # rouge foncé = brûlé
+    assert "#228B22" in contenu  # arbre
+    assert "#FFD700" in contenu  # arbre coupé
+    assert "#8B0000" in contenu  # brûlé
+    assert "#c2b280" in contenu  # terrain vide
+    assert "#1E90FF" in contenu  # eau
 
-    os.remove(chemin_fichier)  # Nettoyage
+    os.remove(chemin_fichier)
+
+

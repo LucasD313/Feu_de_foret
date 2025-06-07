@@ -7,6 +7,8 @@ class Simulateur:
     EAU = 'E'
     FEU = 'F'
     BRULE = 'B'
+    COUPE = 'X'
+    DEPART_FEU = 'D'
 
     def __init__(self, largeur, hauteur, pourcentage_arbres):
         self.largeur = largeur
@@ -68,16 +70,22 @@ class Simulateur:
 
         return meilleur
 
+    def compter_cases_brulees(self):
+        return sum(row.count(self.BRULE) for row in self.carte)
+
     def exporter_html(self, nom_fichier="carte.html"):
         couleurs = {
-            self.VIDE: "#c2b280",
-            self.ARBRE: "#228B22",
-            self.EAU: "#1E90FF",
-            self.BRULE: "#8B0000",
+            self.VIDE: "#c2b280",    # beige
+            self.ARBRE: "#228B22",   # vert
+            self.EAU: "#1E90FF",     # bleu
+            self.BRULE: "#8B0000",   # rouge foncé
+            self.COUPE: "#FFD700",   # or (arbre coupé)
+            self.DEPART_FEU: "#FFA500",  # orange pour le départ du feu
+
         }
 
         html = "<html><head><style>"
-        html += "table {border-collapse: collapse;} td {width: 20px; height: 20px;}"
+        html += "table {border-collapse: collapse;} td {width: 20px; height: 20px; border: 1px solid #ccc;}"
         html += "</style></head><body><table>"
 
         for ligne in self.carte:
@@ -89,5 +97,5 @@ class Simulateur:
 
         html += "</table></body></html>"
 
-        with open(nom_fichier, "w") as f:
+        with open(nom_fichier, "w", encoding="utf-8") as f:
             f.write(html)
