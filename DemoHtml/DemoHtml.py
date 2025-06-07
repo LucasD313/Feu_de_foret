@@ -45,11 +45,15 @@ def main():
 
     # Étape 1 : Génération de la carte initiale
     sim = Simulateur(largeur, hauteur, pourcentage_arbres)
+    sim.carte[y][x] = Simulateur.DEPART_FEU  # Marque le départ du feu
     sim.exporter_html("1_carte_originale.html")
 
     # Étape 2 : Simulation du feu sans déboisement
     sim_sans = Simulateur(largeur, hauteur, pourcentage_arbres)
-    sim_sans.carte = [row[:] for row in sim.carte]
+    sim_sans.carte = [
+        [Simulateur.ARBRE if cell == Simulateur.DEPART_FEU else cell for cell in row]
+        for row in sim.carte
+    ]
     sim_sans.propager_feu(*point_depart)
     sim_sans.exporter_html("2_feu_sans_deboisement.html")
     brulees_sans = sim_sans.compter_cases_brulees()
@@ -69,10 +73,22 @@ def main():
 
     # Étape 4 : Simulation du feu après déboisement
     sim_avec = Simulateur(largeur, hauteur, pourcentage_arbres)
-    sim_avec.carte = [row[:] for row in sim.carte]
+    sim_avec.carte = [
+        [Simulateur.ARBRE if cell == Simulateur.DEPART_FEU else cell for cell in row]
+        for row in sim.carte
+    ]
     sim_avec.propager_feu(*point_depart)
     sim_avec.exporter_html("3_feu_avec_deboisement.html")
     brulees_avec = sim_avec.compter_cases_brulees()
+
+    # Résumé
+    print("\n✅ Simulation terminée !")
+    print(f"🔥 Cases brûlées sans déboisement : {brulees_sans}")
+    print(f"🪓 Cases brûlées avec {nb_deboisements} déboisement(s) : {brulees_avec}")
+    print("📄 Fichiers générés :")
+    print(" - 1_carte_originale.html")
+    print(" - 2_feu_sans_deboisement.html")
+    print(" - 3_feu_avec_deboisement.html")
 
 if __name__ == "__main__":
     main()
