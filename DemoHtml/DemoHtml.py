@@ -41,7 +41,7 @@ def main():
     point_depart = (x, y)
 
     # Nombre de déboisement possible
-    nb_deboisements_max = demander_entier("Nombre maximum d'arbres à couper : ", min_val=0)
+    nb_deboisements_max = demander_entier("Nombre maximum d'arbres à déboiser : ", min_val=0)
 
     # Étape 1 : Génération de la carte initiale
     sim = Simulateur(largeur, hauteur, pourcentage_arbres)
@@ -63,22 +63,22 @@ def main():
 
     # Étape 3 : Recherche des meilleurs arbres à couper
     print("\n Déboisement intelligent en cours...")
-    arbres_coupes = 0
-    while arbres_coupes < nb_deboisements_max:
+    arbres_deboises = 0
+    while arbres_deboises < nb_deboisements_max:
         meilleur, brulees_apres = sim.trouver_meilleur_deboisement(*point_depart)
 
         if meilleur is None:
-            print(f" Aucun arbre à couper trouvé à l'itération {arbres_coupes + 1}.")
+            print(f" Aucun arbre à déboiser trouvé à l'itération {arbres_deboises + 1}.")
             break
 
         if brulees_apres < brulees_actuelles:
             mx, my = meilleur
             sim.carte[my][mx] = Simulateur.COUPE
             brulees_actuelles = brulees_apres
-            arbres_coupes += 1
-            print(f" Arbre #{arbres_coupes} coupé à : {meilleur} → {brulees_apres} cases brûlées")
+            arbres_deboises += 1
+            print(f" Arbre #{arbres_deboises} déboisé à : {meilleur} → {brulees_apres} cases brûlées")
         else:
-            print(f" Arbre {meilleur} ignoré (aucune amélioration)")
+            print(f"ℹ Arbre {meilleur} ignoré (aucune réduction supplémentaire du feu)")
             break
 
     # Étape 4 : Simulation du feu après déboisement
@@ -90,15 +90,16 @@ def main():
     sim_avec.propager_feu(*point_depart)
     brulees_final = sim_avec.compter_cases_brulees()
     sim_avec.exporter_html("3_feu_avec_deboisement.html",
-                           point_depart=point_depart,
-                           nb_brulees=brulees_final,
-                           arbres_coupes=arbres_coupes,
-                           nb_brulees_avant=brulees_actuelles)
+        point_depart=point_depart,
+        nb_brulees_avant=brulees_actuelles,  # avant déboisement
+        nb_brulees=brulees_final,  # après déboisement
+        arbres_coupes=arbres_deboises
+    )
 
     # Résumé
     print("\n✅ Simulation terminée !")
     print(f"🔥 Cases brûlées sans déboisement : {sim_sans.compter_cases_brulees()}")
-    print(f"🪓 Cases brûlées avec {arbres_coupes} déboisement(s) : {brulees_final}")
+    print(f"🪓 Cases brûlées avec {arbres_deboises} déboisement(s) : {brulees_final}")
     print("📄 Fichiers générés :")
     print(" - 1_carte_originale.html")
     print(" - 2_feu_sans_deboisement.html")
