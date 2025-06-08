@@ -1,54 +1,104 @@
 import os
+import tempfile
 from feu_foret.simulateur import Simulateur
 
-def test_propagation_du_feu():
+def test_propagation_du_feu_complete():
+    """Test de propagation du feu dans toutes les directions depuis le centre."""
     sim = Simulateur(3, 3, 0)
     sim.carte = [
         ['.', 'A', '.'],
         ['A', 'A', 'A'],
         ['.', 'A', '.'],
     ]
-    sim.propager_feu(1, 1)
+    sim.propager_feu(1, 1)  # centre
 
-    # Toutes les cases A doivent être brûlées
-    for y in range(3):
-        for x in range(3):
-            case = sim.carte[y][x]
-            if case == 'A':
-                assert False, f"Case ({x},{y}) aurait dû brûler"
-    assert sim.carte[1][1] == 'B'  # Le point de départ
-
-def test_trouver_meilleur_deboisement():
-    sim = Simulateur(3, 3, 0)
-    sim.carte = [
-        ['.', 'A', '.'],
-        ['A', 'A', 'A'],
-        ['.', 'A', '.'],
+    attendu = [
+        ['.', 'B', '.'],
+        ['B', 'B', 'B'],
+        ['.', 'B', '.'],
     ]
-    meilleur = sim.trouver_meilleur_deboisement(1, 1)
+    assert sim.carte == attendu, f"Carte après propagation incorrecte : {sim.carte}"
+    assert sim.compter_cases_brulees() == 5
 
-    # Vérifie que la position est bien un arbre dans la configuration d'origine
-    assert isinstance(meilleur, tuple)
-    x, y = meilleur
-    assert 0 <= x < sim.largeur and 0 <= y < sim.hauteur
-    assert sim.carte[y][x] == 'A'
-
-def test_export_html():
+def test_propagation_pas_sur_arbre():
+    """La propagation ne commence pas sur une case qui n'est pas un arbre."""
     sim = Simulateur(2, 2, 0)
     sim.carte = [
-        ['A', '.'],
-        ['E', 'B'],
+        ['.', 'E'],
+        ['X', 'B']
     ]
-    chemin_fichier = "test_carte.html"
-    sim.exporter_html(chemin_fichier)
+    sim.propager_feu(0, 0)
+    assert sim.carte == [
+        ['.', 'E'],
+        ['X', 'B']
+    ], "La propagation ne devrait pas modifier la carte"
 
-    assert os.path.exists(chemin_fichier)
+def test_trouver_meilleur_deboisement_minimise_brule():
+    """Teste que le meilleur déboisement réduit le nombre de cases brûlées."""
+    sim = Simulateur(3, 3, 0)
+    sim.carte = [
+        ['A', 'A', 'A'],
+        ['A', 'A', 'A'],
+        ['A', 'A', 'A'],
+    ]
+    meilleur, brulees = sim.trouver_meilleur_deboisement(1, 1)
+    assert isinstance(meilleur, tuple)
+    assert brulees < 9, "Déboisement devrait réduire le nombre de brûlés"
 
-    with open(chemin_fichier, "r", encoding="utf-8") as f:
-        contenu = f.read()
+def test_compter_cases_brulees_correctement():
+    sim = Simulateur(3, 3, 0)
+    sim.carte = [
+        ['B', 'A', 'B'],
+        ['A', 'B', 'A'],
+        ['B', '.', 'B'],
+    ]
+    assert sim.compter_cases_brulees() == 5
 
-    assert "<table>" in contenu
-    assert "#228B22" in contenu  # vert = arbre
-    assert "#8B0000" in contenu  # rouge foncé = brûlé
+def test_export_html_contenu_et_elements():
+    sim = Simulateur(2, 2, 0)
+    sim.carte = [
+        ['A', 'E'],
+        ['B', 'X']
+    ]
+    with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tmp:
+        chemin = tmp.name
+    try:
+        sim.exporter_html(
+            chemin_fichier=chemin,
+            point_depart=(0, 0),
+            nb_brulees=1,
+            arbres_coupes=[(1, 1)],
+            nb_brulees_avant=3
+        )
 
-    os.remove(chemin_fichier)  # Nettoyage
+        with open(chemin, "r", encoding="utf-8") as f:
+            contenu = f.read()
+
+        # Vérifie les chemins d'images spécifiques
+        assert "../Assets/arbre.png" in contenu
+        assert "../Assets/eau.png" in contenu
+        assert "../Assets/feu.png" in contenu
+        assert "../Assets/sol.png" in contenu
+        assert "../Assets/terrain.png" in contenu
+
+        # Vérifie la présence du résumé
+        assert "Départ du feu" in contenu
+        assert "Après déboisement" in contenu
+        assert "Avant déboisement" in contenu
+        assert "Arbres déboisés" in contenu
+
+    finally:
+        os.remove(chemin)
+
+def test_export_html_fonctionne_meme_sans_resume():
+    sim = Simulateur(1, 1, 0)
+    sim.carte = [['A']]
+    with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tmp:
+        chemin = tmp.name
+    try:
+        sim.exporter_html(chemin_fichier=chemin)
+        with open(chemin, "r", encoding="utf-8") as f:
+            contenu = f.read()
+        assert "<table>" in contenu
+    finally:
+        os.remove(chemin)
