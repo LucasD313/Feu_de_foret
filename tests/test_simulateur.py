@@ -53,7 +53,6 @@ def test_compter_cases_brulees_correctement():
         ['B', '.', 'B'],
     ]
     assert sim.compter_cases_brulees() == 5
-
 def test_export_html_contenu_et_elements():
     sim = Simulateur(2, 2, 0)
     sim.carte = [
@@ -64,7 +63,7 @@ def test_export_html_contenu_et_elements():
         chemin = tmp.name
     try:
         sim.exporter_html(
-            chemin_fichier=chemin,
+            nom_fichier=chemin,
             point_depart=(0, 0),
             nb_brulees=1,
             arbres_coupes=[(1, 1)],
@@ -96,7 +95,7 @@ def test_export_html_fonctionne_meme_sans_resume():
     with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tmp:
         chemin = tmp.name
     try:
-        sim.exporter_html(chemin_fichier=chemin)
+        sim.exporter_html(nom_fichier=chemin)
         with open(chemin, "r", encoding="utf-8") as f:
             contenu = f.read()
         assert "<table>" in contenu
