@@ -21,11 +21,12 @@ def test_trouver_meilleur_deboisement():
         ['A', 'A', 'A'],
         ['.', 'A', '.'],
     ]
-    meilleur = sim.trouver_meilleur_deboisement(1, 1)
+    meilleur, _ = sim.trouver_meilleur_deboisement(1, 1)
     assert isinstance(meilleur, tuple)
     x, y = meilleur
     assert 0 <= x < sim.largeur and 0 <= y < sim.hauteur
     assert sim.carte[y][x] == 'A'
+
 
 def test_compter_cases_brulees():
     sim = Simulateur(3, 3, 0)
