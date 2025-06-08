@@ -73,7 +73,7 @@ def main():
 
         if brulees_apres < brulees_actuelles:
             mx, my = meilleur
-            sim.carte[my][mx] = Simulateur.COUPE
+            sim.carte[my][mx] = Simulateur.DEBOISE
             brulees_actuelles = brulees_apres
             arbres_deboises += 1
             print(f" Arbre #{arbres_deboises} déboisé à : {meilleur} → {brulees_apres} cases brûlées")
